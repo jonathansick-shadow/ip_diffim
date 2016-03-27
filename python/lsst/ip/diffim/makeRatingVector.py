@@ -7,35 +7,36 @@ import lsst.afw.math as afwMath
 
 # Basically deprecated until SDQA is replaced
 
+
 def makeRatingVector(kernelCellSet, spatialKernel, spatialBg):
-    imstats    = diffimLib.ImageStatisticsF()
+    imstats = diffimLib.ImageStatisticsF()
     #sdqaVector = sdqa.SdqaRatingSet()
 
     width, height = spatialKernel.getDimensions()
-    kImage        = afwImage.ImageD(width, height)
+    kImage = afwImage.ImageD(width, height)
     # find the kernel sum and its Rms by looking at the 4 corners of the image
     kSums = afwMath.vectorD()
     for x in (0, width):
         for y in (0, height):
             kSum = spatialKernel.computeImage(kImage, False, x, y)
             kSums.push_back(kSum)
-            
+
     #afwStat    = afwMath.makeStatistics(kSums, afwMath.MEAN | afwMath.STDEV)
-    #kSumRating = sdqa.SdqaRating("lsst.ip.diffim.kernel_sum",
+    # kSumRating = sdqa.SdqaRating("lsst.ip.diffim.kernel_sum",
     #                             afwStat.getValue(afwMath.MEAN),
     #                             afwStat.getValue(afwMath.STDEV),
     #                             scope)
-    #sdqaVector.append(kSumRating)
+    # sdqaVector.append(kSumRating)
 
     nGood = 0
-    nBad  = 0
+    nBad = 0
     for cell in kernelCellSet.getCellList():
-        for cand in cell.begin(False): # False = include bad candidates
+        for cand in cell.begin(False):  # False = include bad candidates
             cand = diffimLib.cast_KernelCandidateF(cand)
             if cand.getStatus() == afwMath.SpatialCellCandidate.GOOD:
                 # this has been used for processing
                 nGood += 1
-    
+
                 xCand = int(cand.getXCenter())
                 yCand = int(cand.getYCenter())
 
@@ -46,33 +47,33 @@ def makeRatingVector(kernelCellSet, spatialKernel, spatialBg):
 
                 diffIm = cand.getDifferenceImage(kernel, background)
                 imstats.apply(diffIm)
-                
+
                 #candMean   = imstats.getMean()
                 #candRms    = imstats.getRms()
-                #candRating = sdqa.SdqaRating("lsst.ip.diffim.residuals_%d_%d" % (xCand, yCand),
+                # candRating = sdqa.SdqaRating("lsst.ip.diffim.residuals_%d_%d" % (xCand, yCand),
                 #                             candMean, candRms, scope)
-                #sdqaVector.append(candRating)
+                # sdqaVector.append(candRating)
             elif cand.getStatus() == afwMath.SpatialCellCandidate.BAD:
                 nBad += 1
 
     #nGoodRating = sdqa.SdqaRating("lsst.ip.diffim.nCandGood", nGood, 0, scope)
-    #sdqaVector.append(nGoodRating)
+    # sdqaVector.append(nGoodRating)
     #nBadRating = sdqa.SdqaRating("lsst.ip.diffim.nCandBad", nBad, 0, scope)
-    #sdqaVector.append(nBadRating)
+    # sdqaVector.append(nBadRating)
 
     nKernelTerms = spatialKernel.getNSpatialParameters()
-    if nKernelTerms == 0: # order 0
+    if nKernelTerms == 0:  # order 0
         nKernelTerms = 1
     #nBgTerms     = len(spatialBg.getParameters())
     #nKernRating  = sdqa.SdqaRating("lsst.ip.diffim.nTermsSpatialKernel", nKernelTerms, 0, scope)
     #nBgRating    = sdqa.SdqaRating("lsst.ip.diffim.nTermsSpatialBg", nBgTerms, 0, scope)
-    #sdqaVector.append(nKernRating)
-    #sdqaVector.append(nBgRating)
+    # sdqaVector.append(nKernRating)
+    # sdqaVector.append(nBgRating)
 
-    #for i in range(sdqaVector.size()):
+    # for i in range(sdqaVector.size()):
     #    pexLog.Trace("lsst.ip.diffim.makeSdqaRatingVector", 5,
     #                 "Sdqa Rating %s : %.2f %.2f" % (sdqaVector[i].getName(),
     #                                                 sdqaVector[i].getValue(),
     #                                                 sdqaVector[i].getErr()))
-    #                 
-    #return sdqaVector
+    #
+    # return sdqaVector

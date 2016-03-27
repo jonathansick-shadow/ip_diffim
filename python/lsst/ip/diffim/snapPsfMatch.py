@@ -1,7 +1,7 @@
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -9,22 +9,24 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 import lsst.pex.config as pexConfig
 from psfMatch import PsfMatchConfigDF, PsfMatchConfigAL
 from imagePsfMatch import ImagePsfMatchTask, ImagePsfMatchConfig
 
+
 class SnapPsfMatchConfigDF(PsfMatchConfigDF):
     """Delta-function Psf-matching config optimized for snap subtraction"""
+
     def setDefaults(self):
         PsfMatchConfigDF.setDefaults(self)
 
@@ -36,8 +38,10 @@ class SnapPsfMatchConfigDF(PsfMatchConfigDF):
         self.subtractMeanForPca = True
         self.numPrincipalComponents = 5
 
+
 class SnapPsfMatchConfigAL(PsfMatchConfigAL):
     """Sum-of-Gaussian (Alard-Lupton) Psf-matching config optimized for snap subtraction"""
+
     def setDefaults(self):
         PsfMatchConfigAL.setDefaults(self)
 
@@ -45,6 +49,7 @@ class SnapPsfMatchConfigAL(PsfMatchConfigAL):
         self.alardNGauss = 2
         self.alardDegGauss = (4, 2)
         self.alardSigGauss = (1.0, 2.5)
+
 
 class SnapPsfMatchConfig(ImagePsfMatchConfig):
     kernel = pexConfig.ConfigChoiceField(
@@ -58,7 +63,7 @@ class SnapPsfMatchConfig(ImagePsfMatchConfig):
 
     doWarping = pexConfig.Field(
         dtype = bool,
-        doc   = "Warp the snaps?",
+        doc = "Warp the snaps?",
         default = False
     )
 
@@ -77,12 +82,13 @@ class SnapPsfMatchConfig(ImagePsfMatchConfig):
         # With zero spatial order don't worry about spatial clipping
         self.kernel.active.spatialKernelClipping = False
 
-## \addtogroup LSST_task_documentation
-## \{
-## \page SnapPsfMatchTask
-## \ref SnapPsfMatchTask_ "SnapPsfMatchTask"
-## \copybrief SnapPsfMatchTask
-## \}
+# \addtogroup LSST_task_documentation
+# \{
+# \page SnapPsfMatchTask
+# \ref SnapPsfMatchTask_ "SnapPsfMatchTask"
+# \copybrief SnapPsfMatchTask
+# \}
+
 
 class SnapPsfMatchTask(ImagePsfMatchTask):
     """!
@@ -114,11 +120,11 @@ consequence, the default configurations for this class assume a very simple solu
  . The spatial variation in the kernel (SnapPsfMatchConfig.spatialKernelOrder) is assumed to be zero 
 
  . With no spatial variation, we turn of the spatial clipping loops (SnapPsfMatchConfig.spatialKernelClipping)
- 
+
  . The differential background is _not_ fit for (SnapPsfMatchConfig.fitForBackground)
- 
+
  . The kernel is expected to be appx. a delta function, and has a small size (SnapPsfMatchConfig.kernelSize)
- 
+
 The sub-configurations for the Alard-Lupton (SnapPsfMatchConfigAL) and delta-function (SnapPsfMatchConfigDF)
 bases also are designed to generate a small, simple kernel.
 
@@ -256,11 +262,11 @@ And finally provide optional debugging display of the Psf-matched (via the Psf m
                           templateFwhmPix = None, scienceFwhmPix = None,
                           candidateList = None):
         return ImagePsfMatchTask.subtractExposures(self,
-            templateExposure = templateExposure,
-            scienceExposure = scienceExposure,
-            templateFwhmPix = templateFwhmPix,
-            scienceFwhmPix = scienceFwhmPix,
-            candidateList = candidateList,
-            doWarping = self.config.doWarping,
-        )
+                                                   templateExposure = templateExposure,
+                                                   scienceExposure = scienceExposure,
+                                                   templateFwhmPix = templateFwhmPix,
+                                                   scienceFwhmPix = scienceFwhmPix,
+                                                   candidateList = candidateList,
+                                                   doWarping = self.config.doWarping,
+                                                   )
 

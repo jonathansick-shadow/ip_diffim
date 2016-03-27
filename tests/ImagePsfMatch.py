@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-# 
+#
 # LSST Data Management System
 # Copyright 2008-2015 AURA/LSST.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -11,14 +11,14 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
 
@@ -34,18 +34,19 @@ import lsst.meas.algorithms as measAlg
 import lsst.pex.logging as pexLog
 pexLog.Trace_setVerbosity('lsst.ip.diffim', 5)
 
+
 class PsfMatchTestCases(unittest.TestCase):
 
     def setUp(self):
-        self.configAL    = ipDiffim.ImagePsfMatchTask.ConfigClass()
+        self.configAL = ipDiffim.ImagePsfMatchTask.ConfigClass()
         self.configAL.kernel.name = "AL"
         self.subconfigAL = self.configAL.kernel.active
 
-        self.configDF    = ipDiffim.ImagePsfMatchTask.ConfigClass()
+        self.configDF = ipDiffim.ImagePsfMatchTask.ConfigClass()
         self.configDF.kernel.name = "DF"
         self.subconfigDF = self.configDF.kernel.active
 
-        self.configDFr    = ipDiffim.ImagePsfMatchTask.ConfigClass()
+        self.configDFr = ipDiffim.ImagePsfMatchTask.ConfigClass()
         self.configDFr.kernel.name = "DF"
         self.subconfigDFr = self.configDFr.kernel.active
 
@@ -61,11 +62,11 @@ class PsfMatchTestCases(unittest.TestCase):
         self.subconfigDFr.constantVarianceWeighting = False
 
         # variance is a hack
-        self.subconfigAL.singleKernelClipping   = False
-        self.subconfigAL.spatialKernelClipping  = False
-        self.subconfigDF.singleKernelClipping   = False
-        self.subconfigDF.spatialKernelClipping  = False
-        self.subconfigDFr.singleKernelClipping  = False
+        self.subconfigAL.singleKernelClipping = False
+        self.subconfigAL.spatialKernelClipping = False
+        self.subconfigDF.singleKernelClipping = False
+        self.subconfigDF.spatialKernelClipping = False
+        self.subconfigDFr.singleKernelClipping = False
         self.subconfigDFr.spatialKernelClipping = False
 
         # Send fake kernel a differential background
@@ -75,7 +76,7 @@ class PsfMatchTestCases(unittest.TestCase):
         self.subconfigDFr.fitForBackground = True
 
         # Make ideal PSF
-        self.ksize  = 21
+        self.ksize = 21
         self.sigma = 2.0
         self.psf = measAlg.DoubleGaussianPsf(self.ksize, self.ksize, self.sigma)
 
@@ -110,7 +111,7 @@ class PsfMatchTestCases(unittest.TestCase):
         sExp = afwImage.ExposureF(sMi, sWcs)
 
         # Should fail due to registration problem
-        psfMatchAL  = ipDiffim.ImagePsfMatchTask(config=self.configAL)
+        psfMatchAL = ipDiffim.ImagePsfMatchTask(config=self.configAL)
         try:
             psfMatchAL.subtractExposures(tExp, sExp, doWarping = True)
         except Exception as e:
@@ -129,15 +130,15 @@ class PsfMatchTestCases(unittest.TestCase):
         sExp = afwImage.ExposureF(sMi, sWcs)
         sExp.setPsf(self.psf)
 
-        psfMatchAL  = ipDiffim.ImagePsfMatchTask(config=self.configAL)
-        psfMatchDF  = ipDiffim.ImagePsfMatchTask(config=self.configDF)
+        psfMatchAL = ipDiffim.ImagePsfMatchTask(config=self.configAL)
+        psfMatchDF = ipDiffim.ImagePsfMatchTask(config=self.configDF)
         psfMatchDFr = ipDiffim.ImagePsfMatchTask(config=self.configDFr)
 
         self.assertEqual(psfMatchAL.useRegularization, False)
         self.assertEqual(psfMatchDF.useRegularization, False)
         self.assertEqual(psfMatchDFr.useRegularization, True)
 
-        resultsAL  = psfMatchAL.subtractExposures(tExp, sExp, doWarping = True)
+        resultsAL = psfMatchAL.subtractExposures(tExp, sExp, doWarping = True)
         psfMatchDF.subtractExposures(tExp, sExp, doWarping = True)
         psfMatchDFr.subtractExposures(tExp, sExp, doWarping = True)
 
@@ -157,8 +158,8 @@ class PsfMatchTestCases(unittest.TestCase):
         sExp.setPsf(self.psf)
 
         psfMatchAL = ipDiffim.ImagePsfMatchTask(config=self.configAL)
-        resultsAL  = psfMatchAL.matchExposures(tExp, sExp,
-                                               templateFwhmPix = 2.0, scienceFwhmPix = 3.0, doWarping = True)
+        resultsAL = psfMatchAL.matchExposures(tExp, sExp,
+                                              templateFwhmPix = 2.0, scienceFwhmPix = 3.0, doWarping = True)
         self.assertEqual(type(resultsAL.matchedExposure), afwImage.ExposureF)
         self.assertEqual(type(resultsAL.psfMatchingKernel), afwMath.LinearCombinationKernel)
         self.assertEqual(type(resultsAL.backgroundModel), afwMath.Function2D)
@@ -176,9 +177,9 @@ class PsfMatchTestCases(unittest.TestCase):
         self.subconfigDF.usePcaForSpatialKernel = True
         self.subconfigDF.numPrincipalComponents = nTerms
 
-        psfMatchDF  = ipDiffim.ImagePsfMatchTask(config=self.configDF)
+        psfMatchDF = ipDiffim.ImagePsfMatchTask(config=self.configDF)
         candList = psfMatchDF.makeCandidateList(tExp, sExp, self.ksize)
-        resultsDF   = psfMatchDF.subtractMaskedImages(tMi, sMi, candList)
+        resultsDF = psfMatchDF.subtractMaskedImages(tMi, sMi, candList)
 
         spatialKernel = resultsDF.psfMatchingKernel
         spatialKernelSolution = spatialKernel.getSpatialParameters()
@@ -232,13 +233,14 @@ class PsfMatchTestCases(unittest.TestCase):
                 else:
                     # OUTSTANDING ISSUE - WHY IS THIS ONE TERM OFF!?!?
                     if b != 4 and s != 0:
-                       self.assertAlmostEqual(fitCoeffs[b][s]/fakeCoeffs[b][s], 1.0, 1)
+                        self.assertAlmostEqual(fitCoeffs[b][s]/fakeCoeffs[b][s], 1.0, 1)
 
     def tearDown(self):
         del self.configAL
         del self.configDF
         del self.configDFr
         del self.psf
+
 
 def suite():
     """Returns a suite containing all the test cases in this module."""
@@ -248,6 +250,7 @@ def suite():
     suites += unittest.makeSuite(PsfMatchTestCases)
     suites += unittest.makeSuite(tests.MemoryTestCase)
     return unittest.TestSuite(suites)
+
 
 def run(doExit=False):
     """Run the tests"""

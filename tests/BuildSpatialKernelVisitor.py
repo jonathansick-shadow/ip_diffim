@@ -15,25 +15,26 @@ pexLog.Trace_setVerbosity('lsst.ip.diffim', 5)
 # as reducing a delta function basis set into a Pca basis set, look at
 # FitSpatialKernelFromCandidates.py
 
+
 class DiffimTestCases(unittest.TestCase):
-    
+
     def setUp(self):
-        self.config    = ipDiffim.ImagePsfMatchTask.ConfigClass()
+        self.config = ipDiffim.ImagePsfMatchTask.ConfigClass()
         self.config.kernel.name = "AL"
         self.subconfig = self.config.kernel.active
 
         self.policy = pexConfig.makePolicy(self.subconfig)
-        self.size   = 51
+        self.size = 51
 
     def tearDown(self):
         del self.policy
 
     def makeCandidate(self, kSum, x, y):
         mi1 = afwImage.MaskedImageF(afwGeom.Extent2I(self.size, self.size))
-        mi1.getVariance().set(1.0) # avoid NaNs
+        mi1.getVariance().set(1.0)  # avoid NaNs
         mi1.set(self.size//2, self.size//2, (1, 0x0, 1))
         mi2 = afwImage.MaskedImageF(afwGeom.Extent2I(self.size, self.size))
-        mi2.getVariance().set(1.0) # avoid NaNs
+        mi2.getVariance().set(1.0)  # avoid NaNs
         mi2.set(self.size//2, self.size//2, (kSum, 0x0, kSum))
         kc = ipDiffim.makeKernelCandidate(x, y, mi1, mi2, self.policy)
         return kc
@@ -53,13 +54,13 @@ class DiffimTestCases(unittest.TestCase):
 
         bsikv = ipDiffim.BuildSingleKernelVisitorF(basisList, self.policy)
         bspkv = ipDiffim.BuildSpatialKernelVisitorF(basisList, bbox, self.policy)
-        
+
         for x in range(1, self.size, 10):
             for y in range(1, self.size, 10):
                 cand = self.makeCandidate(1.0, x, y)
                 bsikv.processCandidate(cand)
                 bspkv.processCandidate(cand)
-                
+
         bspkv.solveLinearEquation()
         sk, sb = bspkv.getSolutionPair()
 
@@ -70,7 +71,7 @@ class DiffimTestCases(unittest.TestCase):
 
             # One term for each basis function
             self.assertEqual(len(spatialKernelSolution), len(basisList))
-            
+
         else:
             spatialKernelSolution = sk.getSpatialParameters()
 
@@ -93,29 +94,28 @@ class DiffimTestCases(unittest.TestCase):
         bbox = afwGeom.Box2I(afwGeom.Point2I(10, 10),
                              afwGeom.Extent2I(10, 10))
         basisList = ipDiffim.makeKernelBasisList(self.subconfig)
-        
-        self.policy.set("spatialModelType", "polynomial") 
+
+        self.policy.set("spatialModelType", "polynomial")
         ipDiffim.BuildSpatialKernelVisitorF(basisList, bbox, self.policy)
 
-        self.policy.set("spatialModelType", "chebyshev1") 
+        self.policy.set("spatialModelType", "chebyshev1")
         ipDiffim.BuildSpatialKernelVisitorF(basisList, bbox, self.policy)
 
         try:
-            self.policy.set("spatialModelType", "foo") 
+            self.policy.set("spatialModelType", "foo")
             ipDiffim.BuildSpatialKernelVisitorF(basisList, bbox, self.policy)
         except Exception:
             pass
         else:
             self.fail()
-            
-        
+
     def testAlSpatialModel(self):
         self.runAlSpatialModel(0, 0)
         self.runAlSpatialModel(1, 0)
         self.runAlSpatialModel(0, 1)
         self.runAlSpatialModel(1, 1)
         self.runAlSpatialModel(2, 2)
-        
+
     def runAlSpatialModel(self, sko, bgo):
         basisList = ipDiffim.makeKernelBasisList(self.subconfig)
         self.policy.set('spatialKernelOrder', sko)
@@ -127,13 +127,13 @@ class DiffimTestCases(unittest.TestCase):
 
         bsikv = ipDiffim.BuildSingleKernelVisitorF(basisList, self.policy)
         bspkv = ipDiffim.BuildSpatialKernelVisitorF(basisList, bbox, self.policy)
-        
+
         for x in range(1, self.size, 10):
             for y in range(1, self.size, 10):
                 cand = self.makeCandidate(1.0, x, y)
                 bsikv.processCandidate(cand)
                 bspkv.processCandidate(cand)
-                
+
         bspkv.solveLinearEquation()
         sk, sb = bspkv.getSolutionPair()
 
@@ -144,7 +144,7 @@ class DiffimTestCases(unittest.TestCase):
 
             # One term for each basis function
             self.assertEqual(len(spatialKernelSolution), len(basisList))
-            
+
         else:
             spatialKernelSolution = sk.getSpatialParameters()
 
@@ -165,7 +165,7 @@ class DiffimTestCases(unittest.TestCase):
 
 
 #####
-        
+
 def suite():
     """Returns a suite containing all the test cases in this module."""
     tests.init()
@@ -174,6 +174,7 @@ def suite():
     suites += unittest.makeSuite(DiffimTestCases)
     suites += unittest.makeSuite(tests.MemoryTestCase)
     return unittest.TestSuite(suites)
+
 
 def run(doExit=False):
     """Run the tests"""

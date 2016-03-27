@@ -14,8 +14,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 import numpy as np
@@ -31,12 +31,13 @@ from lsst.meas.algorithms import SourceDetectionTask, getBackground
 from lsst.meas.base import SingleFrameMeasurementTask
 from .makeKernelBasisList import makeKernelBasisList
 from .psfMatch import PsfMatchTask, PsfMatchConfigDF, PsfMatchConfigAL
-from . import utils as diUtils 
+from . import utils as diUtils
 from . import diffimLib
 from . import diffimTools
 import lsst.afw.display.ds9 as ds9
 
 sigma2fwhm = 2. * np.sqrt(2. * np.log(2.))
+
 
 class ImagePsfMatchConfig(pexConfig.Config):
     """!Configuration for image-to-image Psf matching"""
@@ -71,12 +72,13 @@ class ImagePsfMatchConfig(pexConfig.Config):
         self.selectMeasurement.slots.apFlux = None
         self.selectMeasurement.slots.calibFlux = None
 
-## \addtogroup LSST_task_documentation
-## \{
-## \page ImagePsfMatchTask
-## \ref ImagePsfMatchTask_ "ImagePsfMatchTask"
-## \copybrief ImagePsfMatchTask
-## \}
+# \addtogroup LSST_task_documentation
+# \{
+# \page ImagePsfMatchTask
+# \ref ImagePsfMatchTask_ "ImagePsfMatchTask"
+# \copybrief ImagePsfMatchTask
+# \}
+
 
 class ImagePsfMatchTask(PsfMatchTask):
     """!
@@ -263,7 +265,7 @@ And finally provide some optional debugging displays:
 \until result.subtractedExposure
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    """    
+    """
     ConfigClass = ImagePsfMatchConfig
 
     def __init__(self, *args, **kwargs):
@@ -336,7 +338,7 @@ And finally provide some optional debugging displays:
                 self.log.info("Astrometrically registering template to science image")
                 templatePsf = templateExposure.getPsf()
                 templateExposure = self._warper.warpExposure(scienceExposure.getWcs(),
-                    templateExposure, destBBox=scienceExposure.getBBox())
+                                                             templateExposure, destBBox=scienceExposure.getBBox())
                 templateExposure.setPsf(templatePsf)
             else:
                 pexLog.Trace(self.log.getName(), 1, "ERROR: Input images not registered")
@@ -353,7 +355,6 @@ And finally provide some optional debugging displays:
             else:
                 scienceFwhmPix = self.getFwhmPix(scienceExposure.getPsf())
 
-
         kernelSize = makeKernelBasisList(self.kConfig, templateFwhmPix, scienceFwhmPix)[0].getWidth()
         candidateList = self.makeCandidateList(templateExposure, scienceExposure, kernelSize, candidateList)
 
@@ -369,7 +370,7 @@ And finally provide some optional debugging displays:
         psfMatchedExposure = afwImage.makeExposure(results.matchedImage, scienceExposure.getWcs())
         psfMatchedExposure.setFilter(templateExposure.getFilter())
         psfMatchedExposure.setCalib(scienceExposure.getCalib())
-        results.warpedExposure  = templateExposure
+        results.warpedExposure = templateExposure
         results.matchedExposure = psfMatchedExposure
         return results
 
@@ -425,7 +426,7 @@ And finally provide some optional debugging displays:
             ds9.mtv(templateMaskedImage, frame=lsstDebug.frame, title="Image to convolve")
             lsstDebug.frame += 1
 
-        if display and  displaySciIm:
+        if display and displaySciIm:
             ds9.mtv(scienceMaskedImage, frame=lsstDebug.frame, title="Image to not convolve")
             lsstDebug.frame += 1
 
@@ -456,9 +457,6 @@ And finally provide some optional debugging displays:
                                             metadata=self.metadata)
 
         spatialSolution, psfMatchingKernel, backgroundModel = self._solve(kernelCellSet, basisList)
-
-
-
 
         psfMatchedMaskedImage = afwImage.MaskedImageF(templateMaskedImage.getBBox())
         doNormalize = False
@@ -517,12 +515,12 @@ And finally provide some optional debugging displays:
 
         subtractedExposure = afwImage.ExposureF(scienceExposure, True)
         if convolveTemplate:
-            subtractedMaskedImage  = subtractedExposure.getMaskedImage()
+            subtractedMaskedImage = subtractedExposure.getMaskedImage()
             subtractedMaskedImage -= results.matchedExposure.getMaskedImage()
             subtractedMaskedImage -= results.backgroundModel
         else:
             subtractedExposure.setMaskedImage(results.warpedExposure.getMaskedImage())
-            subtractedMaskedImage  = subtractedExposure.getMaskedImage()
+            subtractedMaskedImage = subtractedExposure.getMaskedImage()
             subtractedMaskedImage -= results.matchedExposure.getMaskedImage()
             subtractedMaskedImage -= results.backgroundModel
 
@@ -556,7 +554,7 @@ And finally provide some optional debugging displays:
 
     @pipeBase.timeMethod
     def subtractMaskedImages(self, templateMaskedImage, scienceMaskedImage, candidateList,
-            templateFwhmPix=None, scienceFwhmPix=None):
+                             templateFwhmPix=None, scienceFwhmPix=None):
         """!Psf-match and subtract two MaskedImages
 
         Do the following, in order:
@@ -589,9 +587,9 @@ And finally provide some optional debugging displays:
             candidateList=candidateList,
             templateFwhmPix=templateFwhmPix,
             scienceFwhmPix=scienceFwhmPix,
-            )
+        )
 
-        subtractedMaskedImage  = afwImage.MaskedImageF(scienceMaskedImage, True)
+        subtractedMaskedImage = afwImage.MaskedImageF(scienceMaskedImage, True)
         subtractedMaskedImage -= results.matchedImage
         subtractedMaskedImage -= results.backgroundModel
         results.subtractedMaskedImage = subtractedMaskedImage
@@ -640,17 +638,16 @@ And finally provide some optional debugging displays:
             self.log.warn("Failed to get background model.  Falling back to median background estimation")
             bkgd = np.ma.extras.median(miArr)
 
-
-        #Take off background for detection
+        # Take off background for detection
         mi -= bkgd
         try:
-            table.setMetadata(self.selectAlgMetadata) 
+            table.setMetadata(self.selectAlgMetadata)
             detRet = self.selectDetection.makeSourceCatalog(
                 table=table,
                 exposure=exposure,
                 sigma=sigma,
                 doSmooth=doSmooth
-                )
+            )
             selectSources = detRet.sources
             self.selectMeasurement.run(measCat=selectSources, exposure=exposure)
         finally:
@@ -735,8 +732,8 @@ And finally provide some optional debugging displays:
         for cand in candidateList:
             bbox = cand['footprint'].getBBox()
 
-            tmi  = afwImage.MaskedImageF(templateMaskedImage, bbox)
-            smi  = afwImage.MaskedImageF(scienceMaskedImage, bbox)
+            tmi = afwImage.MaskedImageF(templateMaskedImage, bbox)
+            smi = afwImage.MaskedImageF(scienceMaskedImage, bbox)
             cand = diffimLib.makeKernelCandidate(cand['source'], tmi, smi, policy)
 
             self.log.logdebug("Candidate %d at %f, %f" % (cand.getId(), cand.getXCenter(), cand.getYCenter()))
@@ -752,18 +749,18 @@ And finally provide some optional debugging displays:
     def _validateWcs(self, templateExposure, scienceExposure):
         """!Return True if the WCS of the two Exposures have the same origin and extent
         """
-        templateWcs    = templateExposure.getWcs() 
-        scienceWcs     = scienceExposure.getWcs()
-        templateBBox   = templateExposure.getBBox()
-        scienceBBox    = scienceExposure.getBBox()
+        templateWcs = templateExposure.getWcs()
+        scienceWcs = scienceExposure.getWcs()
+        templateBBox = templateExposure.getBBox()
+        scienceBBox = scienceExposure.getBBox()
 
         # LLC
         templateOrigin = templateWcs.pixelToSky(afwGeom.Point2D(templateBBox.getBegin()))
-        scienceOrigin  = scienceWcs.pixelToSky(afwGeom.Point2D(scienceBBox.getBegin()))
+        scienceOrigin = scienceWcs.pixelToSky(afwGeom.Point2D(scienceBBox.getBegin()))
 
         # URC
-        templateLimit  = templateWcs.pixelToSky(afwGeom.Point2D(templateBBox.getEnd()))
-        scienceLimit   = scienceWcs.pixelToSky(afwGeom.Point2D(scienceBBox.getEnd()))
+        templateLimit = templateWcs.pixelToSky(afwGeom.Point2D(templateBBox.getEnd()))
+        scienceLimit = scienceWcs.pixelToSky(afwGeom.Point2D(scienceBBox.getEnd()))
 
         self.log.info("Template Wcs : %f,%f -> %f,%f" %
                       (templateOrigin[0], templateOrigin[1],
@@ -773,12 +770,12 @@ And finally provide some optional debugging displays:
                        scienceLimit[0], scienceLimit[1]))
 
         templateBBox = afwGeom.Box2D(templateOrigin.getPosition(), templateLimit.getPosition())
-        scienceBBox  = afwGeom.Box2D(scienceOrigin.getPosition(), scienceLimit.getPosition())
+        scienceBBox = afwGeom.Box2D(scienceOrigin.getPosition(), scienceLimit.getPosition())
         if not (templateBBox.overlaps(scienceBBox)):
             raise RuntimeError("Input images do not overlap at all")
 
-        if ( (templateOrigin.getPosition() != scienceOrigin.getPosition()) or
-             (templateLimit.getPosition()  != scienceLimit.getPosition())  or
-             (templateExposure.getDimensions() != scienceExposure.getDimensions())):
+        if ((templateOrigin.getPosition() != scienceOrigin.getPosition()) or
+                (templateLimit.getPosition() != scienceLimit.getPosition()) or
+                (templateExposure.getDimensions() != scienceExposure.getDimensions())):
             return False
         return True

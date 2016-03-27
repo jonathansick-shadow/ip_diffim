@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -11,14 +11,14 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
@@ -39,20 +39,21 @@ logging.Trace_setVerbosity('lsst.ip.diffim', verbosity)
 
 # This one tests convolve and subtract
 
+
 class DiffimTestCases(unittest.TestCase):
-    
+
     # D = I - (K.x.T + bg)
-        
+
     def setUp(self):
-        self.config    = ipDiffim.ImagePsfMatchTask.ConfigClass()
+        self.config = ipDiffim.ImagePsfMatchTask.ConfigClass()
         self.config.kernel.name = "AL"
         self.subconfig = self.config.kernel.active
-        self.kSize     = self.subconfig.kernelSize
+        self.kSize = self.subconfig.kernelSize
 
         # gaussian reference kernel
-        self.gSize         = self.kSize
+        self.gSize = self.kSize
         self.gaussFunction = afwMath.GaussianFunction2D(2, 3)
-        self.gaussKernel   = afwMath.AnalyticKernel(self.gSize, self.gSize, self.gaussFunction)
+        self.gaussKernel = afwMath.AnalyticKernel(self.gSize, self.gSize, self.gaussFunction)
 
         # known input images
         try:
@@ -63,9 +64,9 @@ class DiffimTestCases(unittest.TestCase):
         if self.defDataDir:
             defImagePath = os.path.join(self.defDataDir, "DC3a-Sim", "sci", "v5-e0",
                                         "v5-e0-c011-a00.sci.fits")
-            self.templateImage  = afwImage.MaskedImageF(defImagePath)
-            self.scienceImage   = self.templateImage.Factory( self.templateImage.getDimensions() )
-            
+            self.templateImage = afwImage.MaskedImageF(defImagePath)
+            self.scienceImage = self.templateImage.Factory(self.templateImage.getDimensions())
+
             afwMath.convolve(self.scienceImage, self.templateImage, self.gaussKernel, False)
 
     def tearDown(self):
@@ -83,9 +84,9 @@ class DiffimTestCases(unittest.TestCase):
         p1 = afwGeom.Point2I(xloc + imsize/2, yloc + imsize/2)
         bbox = afwGeom.Box2I(p0, p1)
 
-        tmi     = afwImage.MaskedImageF(self.templateImage, bbox, afwImage.LOCAL)
-        smi     = afwImage.MaskedImageF(self.scienceImage, bbox, afwImage.LOCAL)
-        diffIm  = ipDiffim.convolveAndSubtract(tmi, smi, self.gaussKernel, bgVal)
+        tmi = afwImage.MaskedImageF(self.templateImage, bbox, afwImage.LOCAL)
+        smi = afwImage.MaskedImageF(self.scienceImage, bbox, afwImage.LOCAL)
+        diffIm = ipDiffim.convolveAndSubtract(tmi, smi, self.gaussKernel, bgVal)
 
         bbox = self.gaussKernel.shrinkBBox(diffIm.getBBox(afwImage.LOCAL))
         diffIm2 = afwImage.MaskedImageF(diffIm, bbox, afwImage.LOCAL)
@@ -102,17 +103,16 @@ class DiffimTestCases(unittest.TestCase):
         p1 = afwGeom.Point2I(xloc + imsize/2, yloc + imsize/2)
         bbox = afwGeom.Box2I(p0, p1)
 
-        tmi     = afwImage.MaskedImageF(self.templateImage, bbox, afwImage.LOCAL)
-        smi     = afwImage.MaskedImageF(self.scienceImage, bbox, afwImage.LOCAL)
-        bgFunc  = afwMath.PolynomialFunction2D(bgOrder)  # coeffs are 0. by default
-        diffIm  = ipDiffim.convolveAndSubtract(tmi, smi, self.gaussKernel, bgFunc)
+        tmi = afwImage.MaskedImageF(self.templateImage, bbox, afwImage.LOCAL)
+        smi = afwImage.MaskedImageF(self.scienceImage, bbox, afwImage.LOCAL)
+        bgFunc = afwMath.PolynomialFunction2D(bgOrder)  # coeffs are 0. by default
+        diffIm = ipDiffim.convolveAndSubtract(tmi, smi, self.gaussKernel, bgFunc)
 
         bbox = self.gaussKernel.shrinkBBox(diffIm.getBBox(afwImage.LOCAL))
         diffIm2 = afwImage.MaskedImageF(diffIm, bbox, afwImage.LOCAL)
         for j in range(diffIm2.getHeight()):
             for i in range(diffIm2.getWidth()):
                 self.assertAlmostEqual(diffIm2.getImage().get(i, j), 0., 4)
-
 
     def testConvolveAndSubtract(self):
         if not self.defDataDir:
@@ -126,7 +126,8 @@ class DiffimTestCases(unittest.TestCase):
         self.runConvolveAndSubtract2(bgOrder=2)
 
 #####
-        
+
+
 def suite():
     """Returns a suite containing all the test cases in this module."""
     tests.init()
@@ -135,6 +136,7 @@ def suite():
     suites += unittest.makeSuite(DiffimTestCases)
     suites += unittest.makeSuite(tests.MemoryTestCase)
     return unittest.TestSuite(suites)
+
 
 def run(doExit=False):
     """Run the tests"""
